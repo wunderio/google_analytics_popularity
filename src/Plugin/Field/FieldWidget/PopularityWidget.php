@@ -91,11 +91,12 @@ class PopularityWidget extends WidgetBase {
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
-    $entity = $original_entity = $items->getEntity();
+    $entity = $items->getEntity();
 
-    if ($entity) {
-      /** @var \Drupal\Core\Entity\ContentEntityInterface $original_entity */
-      $original_entities = $this->entityTypeManager
+    $popularity_entity = NULL;
+    if ($entity && $entity->isNew() === FALSE) {
+      /** @var \Drupal\google_analytics_popularity\PopularityResultsInterface $popularity_entity */
+      $popularity_entities = $this->entityTypeManager
         ->getStorage('popularity_results')
         ->loadByProperties(
           [
@@ -103,12 +104,12 @@ class PopularityWidget extends WidgetBase {
             'langcode' => $entity->language()->getId(),
           ]
         );
-      $original_entity = reset($original_entities);
+      $popularity_entity = reset($popularity_entities);
     }
 
     $element['value'] = $element + [
       '#type' => 'textfield',
-      '#default_value' => !empty($original_entity) ? $original_entity->getPageviews() : NULL,
+      '#default_value' => !empty($popularity_entity) ? $popularity_entity->getPageviews() : NULL,
       '#size' => $this->getSetting('size'),
       '#placeholder' => $this->getSetting('placeholder'),
       '#maxlength' => $this->getFieldSetting('max_length'),
