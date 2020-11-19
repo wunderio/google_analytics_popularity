@@ -1,0 +1,4 @@
+administer google_analytics_popularity settings:
+  title: 'Administer Google Analytics Popularity module'
+  description: 'Perform administration tasks for the Google Analytics Popularity module.'
+  restrict access: TRUE

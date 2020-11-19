@@ -1,0 +1,7 @@
+{
+    "name": "drupal/google_analytics_popularity",
+    "type": "drupal-module",
+    "require": {
+        "google/apiclient": "^2.8"
+    }
+}

@@ -1,0 +1,6 @@
+google_analytics_popularity.admin_form:
+  title: 'Google Analytics Popularity settings'
+  parent: system.admin_config_system
+  description: 'Administrative interface for the Google Analytics Popularity module'
+  weight: -10
+  route_name: google_analytics_popularity.admin_form

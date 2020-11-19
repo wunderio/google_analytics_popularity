@@ -1,0 +1,11 @@
+hotlink: false
+origin: ''
+origin_dir: ''
+use_imagecache_root: true
+verify: true
+keyfile_upload: []
+view_id: ''
+timespan: '-1 day'
+max_items: '2000'
+cron_interval: 24
+

@@ -1,0 +1,96 @@
+<?php
+
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_cron().
+ */
+function google_analytics_popularity_cron() {
+  // Get queue.
+  $queue = \Drupal::queue('google_analytics_popularity_queue');
+
+  // Check cron execution status.
+  $disabled = (NULL !== \Drupal::state()->get('google_analytics_popularity.cron.disabled')) ?
+    \Drupal::state()->get('google_analytics_popularity.cron.disabled') : 0;
+
+  // Check execution interval. Default to an hourly interval.
+  /** @var \Drupal\Core\Config\Config $config */
+  $config = \Drupal::config('google_analytics_popularity.settings');
+  $interval = (NULL !== $config->get('cron_interval')) ?
+    $config->get('cron_interval') * 3600 : 86400;
+
+  // We usually don't want to act every time cron runs (which could be every
+  // minute) so keep a time for the next run in the site state.
+  $next_execution = \Drupal::state()->get('google_analytics_popularity.next_execution');
+  $next_execution = (NULL !== $next_execution) ? $next_execution : 0;
+
+  if ($disabled || \Drupal::time()->getRequestTime() < $next_execution) {
+    return;
+  }
+
+  // Get pageviews from GA.
+  $reporting = \Drupal::service('google_analytics_popularity.reporting_manager');
+  $analytics = $reporting->initializeAnalytics();
+  $response = $reporting->getReport($analytics);
+  $results = $reporting->getResults($response);
+
+  // Create items to the queue.
+  foreach ($results as $result) {
+    $queue->createItem($result);
+  }
+
+  // Update cron states.
+  \Drupal::state()->set('google_analytics_popularity.last_imported', \Drupal::time()->getRequestTime());
+  \Drupal::state()->set('google_analytics_popularity.next_execution', \Drupal::time()->getRequestTime() + $interval);
+}
+
+/**
+ * Implements hook_entity_base_field_info().
+ */
+function google_analytics_popularity_entity_base_field_info(EntityTypeInterface $entity_type) {
+  // Verify that the configuration data isn't null (as is the case before the
+  // module's initialization, in tests), so that in_array() won't fail.
+    if ($entity_type->id() === 'node') {
+      $fields = [];
+
+      //if ($entity_type)
+      $fields['popularity'] = BaseFieldDefinition::create('string')
+        ->setCustomStorage(TRUE)
+        ->setLabel(t('Popularity'))
+        ->setTranslatable(TRUE)
+        ->setComputed(TRUE)
+        ->setDisplayOptions('form', [
+          'type' => 'popularity_default',
+          'weight' => 100,
+        ])
+        ->setDisplayConfigurable('form', FALSE);
+
+      return $fields;
+    }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for node_form().
+ */
+function google_analytics_popularity_form_node_form_alter(&$form, FormStateInterface $form_state) {
+  // Create the group for 'Popularity' base field.
+  if (isset($form['popularity'])) {
+
+    // Create the group for the field.
+    $form['popularity_group'] = [
+      '#type' => 'details',
+      '#title' => t('Popularity'),
+      '#weight' => 100,
+      '#attributes' => ['class' => ['popularity-group-form']],
+      '#optional' => FALSE,
+    ];
+
+    // Attach the field to group.
+    $form['popularity']['#group'] = 'popularity_group';
+
+    // Show the field group as a vertical tab.
+    $form['popularity_group']['#group'] = 'advanced';
+  }
+}

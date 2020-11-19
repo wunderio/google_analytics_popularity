@@ -1,0 +1,4 @@
+services:
+  google_analytics_popularity.reporting_manager:
+    class: 'Drupal\google_analytics_popularity\AnalyticsReportingManager'
+    arguments: ['@config.factory']
