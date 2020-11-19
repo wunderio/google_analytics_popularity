@@ -2,11 +2,11 @@
 
 namespace Drupal\google_analytics_popularity\Entity;
 
-use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityChangedTrait;
+use Drupal\google_analytics_popularity\PopularityResultsInterface;
 
 /**
  * Defines the Google Analytics Popularity Results entity.
@@ -33,7 +33,7 @@ use Drupal\Core\Entity\EntityChangedTrait;
  *   },
  * )
  */
-class PopularityResults extends ContentEntityBase implements ContentEntityInterface {
+class PopularityResults extends ContentEntityBase implements PopularityResultsInterface {
 
   use EntityChangedTrait;
 
