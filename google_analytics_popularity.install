@@ -1,0 +1,39 @@
+<?php
+
+/**
+ * @file
+ * Installation functions for the google_analytics_popularity module.
+ */
+
+/**
+ * Implements hook_requirements.
+ */
+function google_analytics_popularity_requirements($phase) {
+  $requirements = [];
+
+  if ($phase == 'runtime') {
+    $config = \Drupal::config('google_analytics_popularity.settings');
+
+    if (!empty($config->get('keyfile_uri'))) {
+      $keyfile_uri = $config->get('keyfile_uri');
+
+      /* @var \Drupal\file\FileInterface[] $files */
+      $files = \Drupal::entityTypeManager()
+        ->getStorage('file')
+        ->loadByProperties(['uri' => $keyfile_uri]);
+
+      if (empty($files)) {
+        $requirements['google_analytics_popularity_keyfile'] = [
+          'title' => t('Google Analytics Popularity status'),
+          'description' => t(
+            'Google Analytics Development Credentials keyfile missing. Please reload keyfile at <a href=":url">Google Analytics Popularity Settings</a>',
+            [':url' => '/admin/config/system/google_analytics_popularity']
+          ),
+          'severity' => REQUIREMENT_ERROR,
+        ];
+      }
+    }
+  }
+
+  return $requirements;
+}
