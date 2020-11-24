@@ -3,6 +3,7 @@
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\google_analytics_popularity\Form\SettingsForm;
 
 /**
  * Implements hook_cron().
@@ -12,8 +13,8 @@ function google_analytics_popularity_cron() {
   $queue = \Drupal::queue('google_analytics_popularity_queue');
 
   // Check cron execution status.
-  $disabled = (NULL !== \Drupal::state()->get('google_analytics_popularity.cron.disabled')) ?
-    \Drupal::state()->get('google_analytics_popularity.cron.disabled') : 0;
+  $disabled = (NULL !== \Drupal::state()->get('google_analytics_popularity.cron_disabled')) ?
+    \Drupal::state()->get('google_analytics_popularity.cron_disabled') : 0;
 
   // Check execution interval. Default to an hourly interval.
   /** @var \Drupal\Core\Config\Config $config */
@@ -78,10 +79,19 @@ function google_analytics_popularity_form_node_form_alter(&$form, FormStateInter
   // Create the group for 'Popularity' base field.
   if (isset($form['popularity'])) {
 
+    $timespan = \Drupal::config('google_analytics_popularity.settings')->get('timespan');
+    $timespan_labels = SettingsForm::getTimespanOptions();
+
+    $last_import = \Drupal::state()->get('google_analytics_popularity.last_imported');
+
     // Create the group for the field.
     $form['popularity_group'] = [
       '#type' => 'details',
       '#title' => t('Popularity'),
+      '#description' => t(
+        'Metrics provided by Google Analytics. Retrieval timespan: @timespan. Last update on @imported',
+        ['@timespan' => $timespan_labels[$timespan], '@imported' => gmdate("d.m.Y H:i:s", $last_import)]
+      ),
       '#weight' => 100,
       '#attributes' => ['class' => ['popularity-group-form']],
       '#optional' => FALSE,
