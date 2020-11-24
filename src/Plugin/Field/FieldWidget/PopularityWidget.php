@@ -100,22 +100,47 @@ class PopularityWidget extends WidgetBase {
         ->getStorage('popularity_results')
         ->loadByProperties(
           [
-            'nid' => $entity->id(),
+            'node_id' => $entity->id(),
             'langcode' => $entity->language()->getId(),
           ]
         );
       $popularity_entity = reset($popularity_entities);
     }
-
-    $element['value'] = $element + [
+    $element['sessions'] = $element + [
       '#type' => 'textfield',
-      '#default_value' => !empty($popularity_entity) ? $popularity_entity->getPageviews() : NULL,
+      '#default_value' => !empty($popularity_entity) ? $popularity_entity->getSessionsCount() : NULL,
       '#size' => $this->getSetting('size'),
       '#placeholder' => $this->getSetting('placeholder'),
       '#maxlength' => $this->getFieldSetting('max_length'),
       '#attributes' => ['class' => ['js-text-full', 'text-full']],
       '#disabled' => TRUE,
     ];
+    $element['sessions']['#title'] = $this->t('Sessions');
+    $element['sessions']['#description'] = $this->t('The total number of sessions for this page with set retrieval timespan.');
+
+    $element['pageviews'] = $element + [
+      '#type' => 'textfield',
+      '#default_value' => !empty($popularity_entity) ? $popularity_entity->getPageviewsCount() : NULL,
+      '#size' => $this->getSetting('size'),
+      '#placeholder' => $this->getSetting('placeholder'),
+      '#maxlength' => $this->getFieldSetting('max_length'),
+      '#attributes' => ['class' => ['js-text-full', 'text-full']],
+      '#disabled' => TRUE,
+    ];
+    $element['pageviews']['#title'] = $this->t('Pageviews');
+    $element['pageviews']['#description'] = $this->t('The total number of pageviews for this page with set retrieval timespan.');
+
+    $element['unique_pageviews'] = $element + [
+      '#type' => 'textfield',
+      '#default_value' => !empty($popularity_entity) ? $popularity_entity->getPageviewsCount() : NULL,
+      '#size' => $this->getSetting('size'),
+      '#placeholder' => $this->getSetting('placeholder'),
+      '#maxlength' => $this->getFieldSetting('max_length'),
+      '#attributes' => ['class' => ['js-text-full', 'text-full']],
+      '#disabled' => TRUE,
+    ];
+    $element['unique_pageviews']['#title'] = $this->t('Unique pageviews');
+    $element['unique_pageviews']['#description'] = $this->t('The total number of unique pageviews for this page with set retrieval timespan.');
 
     return $element;
   }

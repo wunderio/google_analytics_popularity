@@ -23,7 +23,7 @@ interface PopularityResultsInterface extends ContentEntityInterface, EntityChang
    * @return $this
    *   The called popularity results entity.
    */
-  public function setNid($nid);
+  public function setReferencedNodeId($nid);
 
   /**
    * Returns the referenced node id of this popularity results.
@@ -31,7 +31,7 @@ interface PopularityResultsInterface extends ContentEntityInterface, EntityChang
    * @return int
    *   The referenced node id of this popularity results.
    */
-  public function getNid();
+  public function getReferencedNodeId();
 
   /**
    * Sets the referenced node type of this popularity results.
@@ -42,7 +42,7 @@ interface PopularityResultsInterface extends ContentEntityInterface, EntityChang
    * @return $this
    *   The called popularity results entity.
    */
-  public function setBundle($type);
+  public function setReferencedNodeType($type);
 
   /**
    * Returns the referenced node type of this popularity results.
@@ -50,7 +50,7 @@ interface PopularityResultsInterface extends ContentEntityInterface, EntityChang
    * @return string
    *   The referenced node type of this popularity results.
    */
-  public function getBundle();
+  public function getReferencedNodeType();
 
   /**
    * Sets the referenced node title of this popularity results.
@@ -61,7 +61,7 @@ interface PopularityResultsInterface extends ContentEntityInterface, EntityChang
    * @return $this
    *   The called popularity results entity.
    */
-  public function setTitle($title);
+  public function setReferencedNodeTitle($title);
 
   /**
    * Returns the referenced node title of this popularity results.
@@ -69,7 +69,7 @@ interface PopularityResultsInterface extends ContentEntityInterface, EntityChang
    * @return string
    *   The referenced node title of this popularity results.
    */
-  public function getTitle();
+  public function getReferencedNodeTitle();
 
   /**
    * Sets the referenced node url alias path of this popularity results.
@@ -91,6 +91,25 @@ interface PopularityResultsInterface extends ContentEntityInterface, EntityChang
   public function getPath();
 
   /**
+   * Sets the sessions count of this popularity results.
+   *
+   * @param int $sessions
+   *   Count of sessions.
+   *
+   * @return $this
+   *   The called popularity results entity.
+   */
+  public function setSessionsCount($sessions);
+
+  /**
+   * Returns the sessions count of this popularity results.
+   *
+   * @return int
+   *   The sessions count of this popularity results.
+   */
+  public function getSessionsCount();
+
+  /**
    * Sets the page views count of this popularity results.
    *
    * @param int $pageviews
@@ -99,7 +118,7 @@ interface PopularityResultsInterface extends ContentEntityInterface, EntityChang
    * @return $this
    *   The called popularity results entity.
    */
-  public function setPageviews($pageviews);
+  public function setPageviewsCount($pageviews);
 
   /**
    * Returns the page views count of this popularity results.
@@ -107,7 +126,26 @@ interface PopularityResultsInterface extends ContentEntityInterface, EntityChang
    * @return int
    *   The page views count of this popularity results.
    */
-  public function getPageviews();
+  public function getPageviewsCount();
+
+  /**
+   * Sets the unique page views count of this popularity results.
+   *
+   * @param int $unique_pageviews
+   *   Count of unique page views.
+   *
+   * @return $this
+   *   The called popularity results entity.
+   */
+  public function setUniquePageviewsCount($unique_pageviews);
+
+  /**
+   * Returns the unique page views count of this popularity results.
+   *
+   * @return int
+   *   The unique page views count of this popularity results.
+   */
+  public function getUniquePageviewsCount();
 
   /**
    * Sets the referenced node language prefix of this popularity results.
@@ -127,4 +165,5 @@ interface PopularityResultsInterface extends ContentEntityInterface, EntityChang
    *   The referenced node language prefix of this popularity results.
    */
   public function getLangcode();
+
 }

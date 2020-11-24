@@ -20,7 +20,7 @@ class PopularityResultsViewsData extends EntityViewsData {
     $data['popularity_results_field_data']['table']['join'] = [
       'node_field_data' => [
         'left_field' => 'nid',
-        'field' => 'nid',
+        'field' => 'node_id',
         'extra' => [
           [
             'field' => 'langcode',
@@ -31,8 +31,50 @@ class PopularityResultsViewsData extends EntityViewsData {
     ];
 
     $data['popularity_results_field_data']['pageviews'] = [
-      'title' => t('Pageviews'),
-      'help' => t('Pageviews count per set period of time'),
+      'title' => $this->t('Pageviews'),
+      'help' => $this->t('The total number of pageviews with set retrieval timespan.'),
+      'field' => [
+        'id' => 'standard',
+      ],
+      'filter' => [
+        'id' => 'numeric',
+      ],
+      'sort' => [
+        'id' => 'standard'
+      ]
+    ];
+
+    $data['popularity_results_field_data']['unique_pageviews'] = [
+      'title' => $this->t('Unique pageviews'),
+      'help' => $this->t('The total number of unique pageviews with set retrieval timespan. Unique Pageviews is the number of sessions during which the specified page was viewed at least once.'),
+      'field' => [
+        'id' => 'standard',
+      ],
+      'filter' => [
+        'id' => 'numeric',
+      ],
+      'sort' => [
+        'id' => 'standard'
+      ]
+    ];
+
+    $data['popularity_results_field_data']['sessions'] = [
+      'title' => $this->t('Sessions'),
+      'help' => $this->t('The total number of sessions with set retrieval timespan.'),
+      'field' => [
+        'id' => 'standard',
+      ],
+      'filter' => [
+        'id' => 'numeric',
+      ],
+      'sort' => [
+        'id' => 'standard'
+      ]
+    ];
+
+    $data['popularity_results_field_data']['node_id'] = [
+      'title' => $this->t('Node id'),
+      'help' => $this->t('The node ID to which this popularity result belongs to.'),
       'field' => [
         'id' => 'standard',
       ],
