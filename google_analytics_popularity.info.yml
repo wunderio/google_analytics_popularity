@@ -3,6 +3,8 @@ type: module
 description: Pull top-viewed pages from Google Analytics
 core: 8.x
 core_version_requirement: ^8 || ^9
+configure: google_analytics_popularity.admin_form
 dependencies:
   - drupal:field
+  - drupal:node
   - drupal:views
