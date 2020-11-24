@@ -4,7 +4,6 @@ namespace Drupal\google_analytics_popularity;
 
 use Drupal\Core\Config\ConfigException;
 use Drupal\Core\Config\ConfigFactory;
-use Drupal\file\Entity\File;
 use Google\Client as Google_Client;
 
 /**
@@ -78,6 +77,10 @@ class AnalyticsReportingManager {
     $pageviews->setExpression("ga:pageviews");
     $pageviews->setAlias("pageviews");
 
+    $unique_pageviews = new \Google_Service_AnalyticsReporting_Metric();
+    $unique_pageviews->setExpression("ga:uniquePageviews");
+    $unique_pageviews->setAlias("unique_pageviews");
+
     // Create the Dimensions object.
     $path = new \Google_Service_AnalyticsReporting_Dimension();
     $path->setName("ga:pagePath");
@@ -95,7 +98,7 @@ class AnalyticsReportingManager {
     $request = new \Google_Service_AnalyticsReporting_ReportRequest();
     $request->setViewId($this->getViewId());
     $request->setDateRanges($dateRange);
-    $request->setMetrics([$pageviews]);
+    $request->setMetrics([$pageviews, $sessions, $unique_pageviews]);
     $request->setDimensions([$path]);
     $request->setOrderBys([$ordering]);
     $request->setPageSize($this->config->get('max_items'));
@@ -190,18 +193,13 @@ class AnalyticsReportingManager {
    */
   protected function getKeyFileLocation() {
     // Get managed file from the settings.
-    $fid = $this->config->get('keyfile_upload_fid');
+    $fid = $this->config->get('keyfile_uri');
 
     if (empty($fid)) {
       throw new ConfigException('No configuration set for Json keyfile');
     }
 
-    // Get the file.
-    /** @var \Drupal\file\Entity\File $file */
-    $file = File::load($fid[0]);
-
-    // Return file uri.
-    return $file->getFileUri();
+    return $fid;
   }
 
   /**
