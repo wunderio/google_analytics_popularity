@@ -44,13 +44,27 @@ class SettingsForm extends ConfigFormBase {
     ];
 
     // Google Analytics project keyfile.
+    // Get managed file id.
+    $keyfile_uri = $config->get('keyfile_uri');
+    if ($keyfile_uri) {
+      /** @var \Drupal\file\FileInterface[] $files */
+      $files = \Drupal::entityTypeManager()
+        ->getStorage('file')
+        ->loadByProperties(['uri' => $keyfile_uri]);
+      if (!empty($files)) {
+        $file = reset($files);
+        $fid = $file->id();
+      }
+    }
+
+    // Keyfile.
     $form['credentials']['keyfile_upload'] = [
       '#type' => 'managed_file',
       '#name' => 'keyfile_upload',
       '#title' => $this->t('Json keyfile'),
       '#size' => 40,
       '#upload_location' => \Drupal::hasService('stream_wrapper.private') ? 'private://' : 'public://',
-      '#default_value' => $config->get('keyfile_upload_fid') ?? NULL,
+      '#default_value' => isset($fid) ? [$fid] : [],
       '#upload_validators' => [
         'file_validate_extensions' => ['json'],
         // Pass the maximum file size in bytes (10 kb).
@@ -84,17 +98,7 @@ class SettingsForm extends ConfigFormBase {
       '#type' => 'select',
       '#title' => $this->t('Data retrieval timespan'),
       '#default_value' => $config->get('timespan'),
-      '#options' => [
-        '-1 day' => t('past 24 hours'),
-        '-2 day' => t('past 2 days'),
-        '-3 day' => t('past 3 days'),
-        '-4 day' => t('past 4 days'),
-        '-5 day' => t('past 5 days'),
-        '-1 week' => t('past week'),
-        '-2 week' => t('past 2 weeks'),
-        '-1 month' => t('past month'),
-        '-1 year' => t('past year'),
-      ],
+      '#options' => self::getTimespanOptions(),
       '#description' => $this->t('The timespan for which data should be retrieved, relative to the current day.'),
     ];
 
@@ -112,11 +116,20 @@ class SettingsForm extends ConfigFormBase {
       '#title' => $this->t('Cron Options'),
     ];
 
+    $form['options']['cron_disable'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Disable cron runs temporarily'),
+      '#description' => $this->t('<strong>Note:</strong> This is site specific setting'),
+      '#default_value' => (NULL !== \Drupal::state()->get('google_analytics_popularity.cron_disabled')) ?
+        \Drupal::state()->get('google_analytics_popularity.cron_disabled') : FALSE,
+    ];
+
     $form['options']['cron_interval'] = [
       '#type' => 'select',
       '#title' => $this->t('Cron interval'),
       '#options' => $this->getCronIntervalOptions(),
       '#default_value' => $config->get('cron_interval'),
+      '#description' => $this->t('The frequency how often popularity metrics updated from Google Analytics.'),
     ];
 
     return parent::buildForm($form, $form_state);
@@ -136,7 +149,7 @@ class SettingsForm extends ConfigFormBase {
     $config = $this->config('google_analytics_popularity.settings');
 
     $keys = [
-      'keyfile_upload_fid',
+      'keyfile_uri',
       'view_id',
       'timespan',
       'max_items',
@@ -144,7 +157,7 @@ class SettingsForm extends ConfigFormBase {
     ];
     foreach ($keys as $key) {
       $value = $form_state->getValue($key);
-      if ($key === 'keyfile_upload_fid') {
+      if ($key === 'keyfile_uri') {
         $fid = array_shift($form_state->getValue('keyfile_upload'));
         if (!empty($fid)) {
           $file = File::load($fid);
@@ -154,11 +167,15 @@ class SettingsForm extends ConfigFormBase {
             $file->save();
           }
         }
-        $value = $fid ? [$fid] : [];
+        $value = $file->getFileUri() ?: NULL;
       }
       $config->set($key, $value);
     }
     $config->save();
+
+    // Cron disable state variable.
+    \Drupal::state()->set('google_analytics_popularity.cron_disabled', $form_state->getValue('cron_disable'));
+
     $this->messenger()->addMessage($this->t('Your settings have been saved.'));
   }
 
@@ -179,6 +196,26 @@ class SettingsForm extends ConfigFormBase {
     }
 
     return [0 => $this->t('On every cron run')] + $intervals;
+  }
+
+  /**
+   * Get retrieval timespan options.
+   *
+   * @return array
+   *   List of retrieval timespan options.
+   */
+  public static function getTimespanOptions() {
+    return [
+      '-1 day' => t('Past 24 hours'),
+      '-2 day' => t('Past 2 days'),
+      '-3 day' => t('Past 3 days'),
+      '-4 day' => t('Past 4 days'),
+      '-5 day' => t('Past 5 days'),
+      '-1 week' => t('Past week'),
+      '-2 week' => t('Past 2 weeks'),
+      '-1 month' => t('Past month'),
+      '-1 year' => t('Past year'),
+    ];
   }
 
 }
