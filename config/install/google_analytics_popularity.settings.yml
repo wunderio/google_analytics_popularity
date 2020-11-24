@@ -4,6 +4,7 @@ origin_dir: ''
 use_imagecache_root: true
 verify: true
 keyfile_upload: []
+keyfile_uri: ''
 view_id: ''
 timespan: '-1 day'
 max_items: '2000'
