@@ -13,7 +13,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @QueueWorker(
  *   id = "google_analytics_popularity_queue",
- *   title = @Translation("Store results"),
+ *   title = @Translation("Popularity results"),
  *   cron = {"time" = 30}
  * )
  */
@@ -27,7 +27,7 @@ class ResultsQueueWorker extends QueueWorkerBase implements ContainerFactoryPlug
   private $entityTypeManager;
 
   /**
-   * IndexingQueueWorker constructor.
+   * ResultsQueueWorker constructor.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
@@ -69,7 +69,7 @@ class ResultsQueueWorker extends QueueWorkerBase implements ContainerFactoryPlug
     if ($node_id) {
       $entities = $this->entityTypeManager->getStorage($entity_type)->loadByProperties(
         [
-          'nid' => $node_id,
+          'node_id' => $node_id,
           'langcode' => $this->getLanguageByUrlAlias($url_alias),
         ]
       );
@@ -79,7 +79,9 @@ class ResultsQueueWorker extends QueueWorkerBase implements ContainerFactoryPlug
       if ($entity) {
         // Popularity results entity exists.
         $entity->setPath($url_alias);
-        $entity->setPageviews($data['pageviews']);
+        $entity->setSessionsCount($data['sessions']);
+        $entity->setPageviewsCount($data['pageviews']);
+        $entity->setUniquePageviewsCount($data['unique_pageviews']);
         $entity->save();
       }
       else {
@@ -90,12 +92,14 @@ class ResultsQueueWorker extends QueueWorkerBase implements ContainerFactoryPlug
         $values = [
           'path' => $url_alias,
           'langcode' => $this->getLanguageByUrlAlias($url_alias),
+          'sessions' => $data['sessions'],
           'pageviews' => $data['pageviews'],
-          'nid' => $node_id,
+          'unique_pageviews' => $data['unique_pageviews'],
+          'node_id' => $node_id,
         ];
         if ($node) {
-          $values['title'] = $node->getTranslation($values['langcode'])->getTitle();
-          $values['bundle'] = $node->bundle();
+          $values['node_title'] = $node->getTranslation($values['langcode'])->getTitle();
+          $values['node_type'] = $node->bundle();
         }
 
         $entity = $this->entityTypeManager->getStorage($entity_type)->create($values);
