@@ -5,7 +5,7 @@ namespace Drupal\Tests\google_analytics_popularity\Kernel;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\NodeType;
-use Drupal\pathauto\PathautoState;
+use Drupal\Tests\Traits\Core\PathAliasTestTrait;
 
 /**
  * Tests processing popularity results using a queue.
@@ -13,6 +13,8 @@ use Drupal\pathauto\PathautoState;
  * @group google_analytics_popularity
  */
 class QueueWorkerTest extends KernelTestBase {
+
+  use PathAliasTestTrait;
 
   /**
    * The modules to load to run the test.
@@ -25,8 +27,6 @@ class QueueWorkerTest extends KernelTestBase {
     'text',
     'path',
     'path_alias',
-    'pathauto',
-    'token',
     'system',
     'user',
     'language',
@@ -45,7 +45,7 @@ class QueueWorkerTest extends KernelTestBase {
     if ($this->container->get('entity_type.manager')->hasDefinition('path_alias')) {
       $this->installEntitySchema('path_alias');
     }
-    $this->installConfig(['pathauto', 'system', 'node']);
+    $this->installConfig(['system', 'node']);
 
     ConfigurableLanguage::createFromLangcode('fi')->save();
     ConfigurableLanguage::createFromLangcode('sv')->save();
@@ -120,7 +120,6 @@ class QueueWorkerTest extends KernelTestBase {
           'langcode' => 'en',
           'path' => [
             'alias' => '/news/monday',
-            'pathauto' => PathautoState::SKIP,
           ],
         ],
         'results_path' => '/news/monday',
@@ -133,7 +132,6 @@ class QueueWorkerTest extends KernelTestBase {
           'langcode' => 'sv',
           'path' => [
             'alias' => '/nyheter/mondag',
-            'pathauto' => PathautoState::SKIP,
           ],
         ],
         'results_path' => '/sv/nyheter/mondag',
@@ -146,7 +144,6 @@ class QueueWorkerTest extends KernelTestBase {
           'langcode' => 'fi',
           'path' => [
             'alias' => '/ajankohtaista/maanantai',
-            'pathauto' => PathautoState::SKIP,
           ],
         ],
         'results_path' => '/fi/ajankohtaista/maanantai',
