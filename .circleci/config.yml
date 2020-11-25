@@ -1,0 +1,96 @@
+version: 2.1
+
+commands:
+  start-drupal-test:
+    steps:
+      - run:
+          name: Install Dependencies
+          command: |
+            cd drupal && COMPOSER_MEMORY_LIMIT=-1 composer install -n --prefer-dist --ignore-platform-reqs
+      - run:
+          name: Wait for db
+          command: dockerize -wait tcp://localhost:3306 -timeout 1m
+      - run:
+          name: Install Drupal
+          command: |
+            cd drupal && drush si --db-url=mysql://root:dbpassword@127.0.0.1:3306/drupal --account-pass=admin -y
+      - run:
+          name: Enable scannning of test module directory
+          command: |
+            chmod ug+w drupal/web/sites/default/settings.php
+            echo '$settings["extension_discovery_scan_tests"] = TRUE;' >> drupal/web/sites/default/settings.php
+      - run:
+          name: Install Google Analytics Popularity
+          command: |
+            cd drupal && drush pm-enable google_analytics_popularity -y
+      - run:
+          name: Clear cache
+          command: cd drupal && drush cr
+      - run:
+          name: Run Tests
+          command: |
+            cd drupal/web && php core/scripts/run-tests.sh --verbose --sqlite /tmp/test.sqlite --suppress-deprecations --module google_analytics_popularity
+
+jobs:
+  build:
+    parameters:
+      version:
+        type: string
+    docker:
+      - image: wunderio/circleci-codeception-base
+    steps:
+      - run:
+          name: Create Drupal
+          command: |
+            composer create-project drupal/recommended-project:^<< parameters.version >> drupal
+            cd drupal
+            COMPOSER_MEMORY_LIMIT=-1 composer require drupal/core-dev:^<< parameters.version >>
+            COMPOSER_MEMORY_LIMIT=-1 composer require drush/drush:^10.0.0
+      - save_cache:
+          paths:
+            - ~/project/drupal
+          key: v2-composer-dependencies-{{ .Environment.CIRCLE_SHA1 }}-v<< parameters.version >>
+
+  test-gap:
+    parameters:
+      version:
+        type: string
+      mariadb_version:
+        type: string
+    docker:
+      - image: wunderio/circleci-codeception-base
+      - image: circleci/mariadb:<< parameters.mariadb_version >>
+        environment:
+          MYSQL_DATABASE: drupal
+          MYSQL_ROOT_PASSWORD: dbpassword
+          MYSQL_ROOT_HOST: "%"
+
+    steps:
+      - checkout:
+          path: ~/project/drupal/web/modules/google_analytics_popularity
+      - restore_cache:
+          keys:
+            - v2-composer-dependencies-{{ .Environment.CIRCLE_SHA1 }}-v<< parameters.version >>
+      - start-drupal-test
+
+workflows:
+  build_and_test:
+    jobs:
+      - build:
+          name: build-d89
+          version: "8.9"
+      - build:
+          name: build-d90
+          version: "9.0"
+      - test-gap:
+          name: test-ga
+          version: "8.9"
+          mariadb_version: "10.2"
+          requires:
+            - build-d89
+      - test-gap:
+          name: test-ga
+          version: "9.0"
+          mariadb_version: "10.3"
+          requires:
+            - build-d90
