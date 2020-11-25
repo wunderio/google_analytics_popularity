@@ -1,4 +1,5 @@
 # Google Analytics Popularity
+[![<wunderio>](https://circleci.com/gh/wunderio/google_analytics_popularity/tree/8.x-1.x.svg?style=svg)](<https://app.circleci.com/pipelines/github/wunderio/google_analytics_popularity?branch=8.x-1.x>)
 
 ## Description
 This module uses the Google APIs Client Library for PHP to pull recent top content
