@@ -26,10 +26,12 @@ Known main issues:
 In order to use this module and to pull recent top content from Google Analytics,
 following are required:
 
-- Google API service account .json keyfile.
+- Service Account with access to the Google Analytics view in question to use Google Analytics Reporting API v4
+  - Service account key client_secrets.json
+  - See more info here: https://developers.google.com/analytics/devguides/reporting/core/v4/quickstart/service-php
 - Google Analytics View ID
 
-Please ask these from the GA team before installing this module.
+Please ask these from the Analytics Specialist in the project before installing this module.
 
 Furthermore, please ensure that the site has Drupal private file system enabled
 as .json keyfile is stored as managed file.
